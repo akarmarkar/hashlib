@@ -23,6 +23,7 @@ list_p list_get_tail(list_p head){
     list_p prev;
 
     assert(head);
+    prev = head;
 
     while(current){
         prev = current;
@@ -35,7 +36,7 @@ list_p list_get_tail(list_p head){
 /*
 * Given a pointer to the pointer to head of the list and a pointer to the data to add, append the data to the start of the list.
 */
-list_p list_add_head(list_p* head_p,void* data){
+void list_add_head(list_p* head_p,void* data){
     list_p node = create_new_node(data);
     node->next = *head_p;
     (*head_p)->data = data;
@@ -47,11 +48,11 @@ list_p list_add_head(list_p* head_p,void* data){
 * Given a pointer to head of the list and a pointer to the data to add, append the data to the end of the list.
 */
 void list_add_tail(list_p head,void* data){
+    assert(head);
     list_p tail = list_get_tail(head);
     list_p node = create_new_node(data);
     tail->next = node;
 }
-
 
 
 /*
@@ -59,19 +60,45 @@ void list_add_tail(list_p head,void* data){
 */
 bool list_is_empty(list_p head){
     if (head && head->next)
-        return 1;
-    else
         return 0;
+    else
+        return 1;
 }
 
 /*
 * Given a pointer to head of the list and a function to print a node, print out the entire list
 */
-void list_print(list_p head, void (*print_node_func)(list_p node)){
+void list_print(list_p head, void (*print_node_func)(list_p)){
+    assert(head);
+
     printf("List (%p)=",head);
     for(list_p current=head->next;current;current=current->next) {
         print_node_func(current);
     }
+    printf("NULL\n");
 }
 
-#define list_for_each(head) for(list_p current=head->next;current;current=current->next)
+/*
+* Find an item in the list.
+* head: head of the list
+* data: data item to find
+* isEqual : pointer to a comparison function.
+* returns a pointer to the previous node. returns head if found in first node, NULL otherwise.
+*/
+list_p list_find_prev(list_p head,void* data,bool (*isEqual)(void*,void*)){
+    list_p prev = head;
+    assert(head);
+    assert(data);
+
+    if (list_is_empty(head))
+        return NULL;
+
+    for(list_p current=head->next;current;current=current->next) {
+        if (current->data && isEqual(data,current->data) )
+            return prev;
+        prev = current;
+    }
+
+    return NULL;
+}
+
